@@ -1,12 +1,240 @@
+```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kingdom Defense - 게임 소개</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+
+    body {
+        background: #10131a;
+        color: white;
+        line-height: 1.6;
+    }
+
+    header {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    header h1 {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+
+    header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    nav {
+        background: #181c25;
+        padding: 15px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+    }
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        margin: 0 15px;
+        font-weight: bold;
+    }
+
+    section {
+        max-width: 1200px;
+        margin: auto;
+        padding: 60px 20px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #4db8ff;
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .card {
+        background: #1a202c;
+        padding: 25px;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        background: #243040;
+    }
+
+    .units {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .unit {
+        width: 250px;
+        background: #1a202c;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .unit img {
+        width: 100%;
+        border-radius: 8px;
+    }
+
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+        gap: 20px;
+    }
+
+    .gallery img {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    footer {
+        background: #181c25;
+        text-align: center;
+        padding: 30px;
+        margin-top: 50px;
+    }
+
+    .btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 30px;
+        background: #4db8ff;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: 0.3s;
+    }
+
+    .btn:hover {
+        background: #2196f3;
+    }
+</style>
 </head>
 <body>
-    hello world
-    심준태 test page
+
+<header>
+    <h1>🏰 Kingdom Defense</h1>
+    <p>왕국을 침략하는 몬스터를 막아라!</p>
+    <a href="#download" class="btn">게임 시작하기</a>
+</header>
+
+<nav>
+    <a href="#about">게임 소개</a>
+    <a href="#features">특징</a>
+    <a href="#units">유닛</a>
+    <a href="#screenshots">스크린샷</a>
+</nav>
+
+<section id="about">
+    <h2>게임 소개</h2>
+    <p style="text-align:center;">
+        Kingdom Defense는 전략적인 타워 배치와 영웅 육성을 통해
+        적의 침공을 막아내는 실시간 타워디펜스 게임입니다.
+        다양한 스테이지와 강력한 보스 몬스터가 여러분을 기다립니다.
+    </p>
+</section>
+
+<section id="features">
+    <h2>주요 특징</h2>
+
+    <div class="features">
+        <div class="card">
+            <h3>⚔ 전략적 배치</h3>
+            <p>지형과 적의 이동 경로를 분석하여 최적의 타워를 배치하세요.</p>
+        </div>
+
+        <div class="card">
+            <h3>🧙 다양한 영웅</h3>
+            <p>각기 다른 스킬을 가진 영웅을 성장시키고 활용하세요.</p>
+        </div>
+
+        <div class="card">
+            <h3>👹 강력한 보스</h3>
+            <p>특수 능력을 가진 거대한 보스를 공략하세요.</p>
+        </div>
+
+        <div class="card">
+            <h3>🌎 다양한 맵</h3>
+            <p>숲, 사막, 얼음 왕국 등 개성 넘치는 전장을 경험하세요.</p>
+        </div>
+    </div>
+</section>
+
+<section id="units">
+    <h2>대표 유닛</h2>
+
+    <div class="units">
+        <div class="unit">
+            <img src="images/archer.jpg" alt="궁수">
+            <h3>궁수 타워</h3>
+            <p>빠른 공격 속도로 적을 견제합니다.</p>
+        </div>
+
+        <div class="unit">
+            <img src="images/mage.jpg" alt="마법사">
+            <h3>마법사 타워</h3>
+            <p>광역 마법 공격을 사용합니다.</p>
+        </div>
+
+        <div class="unit">
+            <img src="images/cannon.jpg" alt="대포">
+            <h3>캐논 타워</h3>
+            <p>강력한 범위 피해를 입힙니다.</p>
+        </div>
+    </div>
+</section>
+
+<section id="screenshots">
+    <h2>게임 스크린샷</h2>
+
+    <div class="gallery">
+        <img src="images/screenshot1.jpg" alt="게임 화면 1">
+        <img src="images/screenshot2.jpg" alt="게임 화면 2">
+        <img src="images/screenshot3.jpg" alt="게임 화면 3">
+    </div>
+</section>
+
+<section id="download">
+    <h2>지금 플레이하세요!</h2>
+
+    <p style="text-align:center;">
+        전략과 전술의 재미를 경험해보세요.
+    </p>
+
+    <div style="text-align:center;">
+        <a href="#" class="btn">다운로드</a>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 Kingdom Defense. All Rights Reserved.</p>
+</footer>
+
 </body>
 </html>
+```
