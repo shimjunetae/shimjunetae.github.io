@@ -2,12 +2,12 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Tower Defense Game</title>
+<title>Kingdom Defense FINAL</title>
 
 <style>
 body{
     margin:0;
-    background:#111;
+    background:#0f111a;
     color:white;
     text-align:center;
     font-family:sans-serif;
@@ -16,14 +16,13 @@ body{
 #game{
     width:800px;
     height:500px;
-    margin:10px auto;
+    margin:auto;
     background:#1c1f2a;
     position:relative;
     overflow:hidden;
     border:2px solid #4db8ff;
 }
 
-/* 길 */
 .path{
     position:absolute;
     width:100%;
@@ -32,24 +31,28 @@ body{
     top:220px;
 }
 
-/* 타워 */
 .tower{
-    width:45px;
-    height:45px;
+    width:50px;
+    height:50px;
     position:absolute;
-    border-radius:8px;
+    background-size:cover;
 }
 
-/* 적 */
 .enemy{
-    width:30px;
-    height:30px;
+    width:35px;
+    height:35px;
     position:absolute;
-    background:red;
     border-radius:50%;
+    background:red;
 }
 
-/* 총알 */
+.boss{
+    width:80px;
+    height:80px;
+    position:absolute;
+    background:url('./images/boss.jpg') center/cover;
+}
+
 .bullet{
     width:6px;
     height:6px;
@@ -58,51 +61,49 @@ body{
     border-radius:50%;
 }
 
-/* UI */
 #ui{
-    display:flex;
-    justify-content:center;
-    gap:10px;
     margin-top:10px;
 }
 
-.btn{
+button{
+    margin:5px;
     padding:10px;
     background:#4db8ff;
     border:none;
-    cursor:pointer;
-    border-radius:6px;
     color:white;
-}
-
-.selected{
-    background:#ffcc00;
-    color:black;
+    cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🏰 Tower Defense</h1>
-<h3>돈: <span id="money">100</span></h3>
+<h1>🏰 KINGDOM DEFENSE</h1>
+<h3>💰 돈: <span id="money">100</span></h3>
+<h3>🌊 웨이브: <span id="wave">1</span></h3>
 
 <div id="game">
     <div class="path"></div>
 </div>
 
-<!-- 타워 선택 UI -->
 <div id="ui">
-    <button class="btn" onclick="selectTower(1)">궁수 (20)</button>
-    <button class="btn" onclick="selectTower(2)">마법사 (40)</button>
-    <button class="btn" onclick="selectTower(3)">터렛 (60)</button>
+    <button onclick="select(1)">궁수 (20)</button>
+    <button onclick="select(2)">마법사 (40)</button>
+    <button onclick="select(3)">터렛 (60)</button>
 </div>
+
+<!-- 사운드 -->
+<audio id="shoot" src="sound/shoot.mp3"></audio>
+<audio id="kill" src="sound/kill.mp3"></audio>
+<audio id="boss" src="sound/boss.mp3"></audio>
 
 <script>
 let game = document.getElementById("game");
 
 let money = 100;
-let selectedTower = 1;
+let wave = 1;
+
+let selected = 1;
 
 let towers = [];
 let enemies = [];
@@ -110,28 +111,45 @@ let bullets = [];
 
 document.getElementById("money").innerText = money;
 
-/* 시작 */
-setInterval(spawnEnemy, 2000);
-setInterval(update, 30);
+/* 웨이브 시스템 */
+function startWave(){
+    let count = wave * 3;
 
-/* 타워 선택 */
-function selectTower(type){
-    selectedTower = type;
+    let interval = setInterval(()=>{
+        spawnEnemy();
+
+        count--;
+        if(count <= 0){
+            clearInterval(interval);
+
+            if(wave % 5 == 0){
+                spawnBoss();
+            }
+
+            wave++;
+            document.getElementById("wave").innerText = wave;
+
+            setTimeout(startWave, 3000);
+        }
+    }, 800);
 }
 
-/* 타워 설치 (길 옆만 허용) */
-game.addEventListener("click", (e)=>{
+startWave();
 
+/* 타워 선택 */
+function select(t){
+    selected = t;
+}
+
+/* 타워 설치 */
+game.addEventListener("click",(e)=>{
     let rect = game.getBoundingClientRect();
-
     let x = e.clientX - rect.left;
     let y = e.clientY - rect.top;
 
-    // 길 근처 체크
     if(y > 180 && y < 300){
 
-        let cost = selectedTower == 1 ? 20 : selectedTower == 2 ? 40 : 60;
-
+        let cost = selected==1?20:selected==2?40:60;
         if(money < cost) return;
 
         money -= cost;
@@ -140,50 +158,53 @@ game.addEventListener("click", (e)=>{
         let tower = document.createElement("div");
         tower.className = "tower";
 
-        let color = selectedTower == 1 ? "green" :
-                    selectedTower == 2 ? "purple" : "blue";
+        let img = selected==1?"archer.jpg":
+                  selected==2?"mage.jpg":"turret.jpg";
 
-        tower.style.background = color;
-
-        tower.style.left = (x-20) + "px";
-        tower.style.top = (y-20) + "px";
+        tower.style.backgroundImage = `url('./images/${img}')`;
+        tower.style.left = (x-25)+"px";
+        tower.style.top = (y-25)+"px";
 
         game.appendChild(tower);
 
-        towers.push({
-            el:tower,
-            x:x,
-            y:y,
-            type:selectedTower
-        });
+        towers.push({el:tower,x:x,y:y});
     }
 });
 
-/* 적 생성 */
+/* 적 */
 function spawnEnemy(){
-    let enemy = document.createElement("div");
-    enemy.className = "enemy";
+    let e = document.createElement("div");
+    e.className = "enemy";
+    e.style.left="0px";
+    e.style.top="235px";
 
-    enemy.style.left = "0px";
-    enemy.style.top = "235px";
+    game.appendChild(e);
 
-    game.appendChild(enemy);
-
-    enemies.push({
-        el:enemy,
-        x:0,
-        y:235,
-        hp:3
-    });
+    enemies.push({el:e,x:0,y:235,hp:3});
 }
 
-/* 게임 루프 */
+/* 보스 */
+function spawnBoss(){
+    let b = document.createElement("div");
+    b.className = "boss";
+    b.style.left="0px";
+    b.style.top="210px";
+
+    game.appendChild(b);
+
+    enemies.push({el:b,x:0,y:210,hp:20,boss:true});
+
+    document.getElementById("boss").play();
+}
+
+/* 업데이트 */
+setInterval(update,30);
+
 function update(){
 
-    // 적 이동
     enemies.forEach((e,i)=>{
-        e.x += 2;
-        e.el.style.left = e.x + "px";
+        e.x += e.boss?1:2;
+        e.el.style.left = e.x+"px";
 
         if(e.x > 800){
             e.el.remove();
@@ -191,35 +212,35 @@ function update(){
         }
     });
 
-    // 타워 공격
     towers.forEach(t=>{
         enemies.forEach(e=>{
-            let dx = e.x - t.x;
-            let dy = e.y - t.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
+            let dx=e.x-t.x;
+            let dy=e.y-t.y;
+            let d=Math.sqrt(dx*dx+dy*dy);
 
-            if(dist < 120){
+            if(d<130){
                 shoot(t,e);
             }
         });
     });
 
-    // 총알 이동
     bullets.forEach((b,i)=>{
-        b.x += b.vx;
-        b.y += b.vy;
+        b.x+=b.vx;
+        b.y+=b.vy;
 
-        b.el.style.left = b.x + "px";
-        b.el.style.top = b.y + "px";
+        b.el.style.left=b.x+"px";
+        b.el.style.top=b.y+"px";
 
         enemies.forEach(e=>{
             if(Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<20){
                 e.hp--;
 
-                if(e.hp <= 0){
+                document.getElementById("kill").play();
+
+                if(e.hp<=0){
                     e.el.remove();
-                    e.dead = true;
-                    money += 5;
+                    e.dead=true;
+                    money+=10;
                     updateMoney();
                 }
 
@@ -232,34 +253,34 @@ function update(){
     enemies = enemies.filter(e=>!e.dead);
 }
 
-/* 발사 */
+/* 공격 */
 function shoot(t,e){
-    if(Math.random() < 0.08){
-        let bullet = document.createElement("div");
-        bullet.className = "bullet";
+    if(Math.random()<0.07){
+        let b=document.createElement("div");
+        b.className="bullet";
 
-        bullet.x = t.x;
-        bullet.y = t.y;
+        let dx=e.x-t.x;
+        let dy=e.y-t.y;
+        let d=Math.sqrt(dx*dx+dy*dy);
 
-        let dx = e.x - t.x;
-        let dy = e.y - t.y;
+        b.x=t.x;
+        b.y=t.y;
 
-        let dist = Math.sqrt(dx*dx + dy*dy);
+        b.vx=dx/d*5;
+        b.vy=dy/d*5;
 
-        bullet.vx = dx/dist * 5;
-        bullet.vy = dy/dist * 5;
+        b.el=b;
 
-        bullet.el = bullet;
+        game.appendChild(b);
+        bullets.push(b);
 
-        game.appendChild(bullet);
-
-        bullets.push(bullet);
+        document.getElementById("shoot").play();
     }
 }
 
-/* 돈 UI */
+/* 돈 */
 function updateMoney(){
-    document.getElementById("money").innerText = money;
+    document.getElementById("money").innerText=money;
 }
 </script>
 
