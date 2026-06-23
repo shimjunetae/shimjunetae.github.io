@@ -2,170 +2,264 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kingdom Defense</title>
+<title>Tower Defense Game</title>
 
 <style>
 body{
     margin:0;
-    font-family:sans-serif;
-    background:#10131a;
+    background:#111;
     color:white;
     text-align:center;
+    font-family:sans-serif;
 }
 
-/* 상단 */
-header{
-    padding:40px;
-    background:linear-gradient(135deg,#1e3c72,#2a5298);
-}
-
-/* 게임 화면 */
 #game{
     width:800px;
     height:500px;
-    margin:20px auto;
-    background:#222;
+    margin:10px auto;
+    background:#1c1f2a;
     position:relative;
     overflow:hidden;
     border:2px solid #4db8ff;
 }
 
-/* 터렛 */
-.turret{
-    width:70px;
-    height:70px;
+/* 길 */
+.path{
     position:absolute;
-    bottom:20px;
-    left:365px;
-    background:url('./images/turret.jpg') center/cover no-repeat;
+    width:100%;
+    height:60px;
+    background:#444;
+    top:220px;
+}
+
+/* 타워 */
+.tower{
+    width:45px;
+    height:45px;
+    position:absolute;
+    border-radius:8px;
 }
 
 /* 적 */
 .enemy{
-    width:40px;
-    height:40px;
+    width:30px;
+    height:30px;
     position:absolute;
-    top:0;
     background:red;
     border-radius:50%;
 }
 
 /* 총알 */
 .bullet{
-    width:8px;
-    height:8px;
+    width:6px;
+    height:6px;
     background:yellow;
     position:absolute;
     border-radius:50%;
 }
 
-/* 버튼 */
-button{
-    padding:10px 20px;
-    margin:10px;
+/* UI */
+#ui{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:10px;
+}
+
+.btn{
+    padding:10px;
     background:#4db8ff;
     border:none;
-    color:white;
     cursor:pointer;
-    border-radius:8px;
+    border-radius:6px;
+    color:white;
+}
+
+.selected{
+    background:#ffcc00;
+    color:black;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-    <h1>🏰 Kingdom Defense</h1>
-    <p>터렛으로 적을 막아라!</p>
-</header>
-
-<button onclick="startGame()">게임 시작</button>
+<h1>🏰 Tower Defense</h1>
+<h3>돈: <span id="money">100</span></h3>
 
 <div id="game">
-    <div class="turret"></div>
+    <div class="path"></div>
+</div>
+
+<!-- 타워 선택 UI -->
+<div id="ui">
+    <button class="btn" onclick="selectTower(1)">궁수 (20)</button>
+    <button class="btn" onclick="selectTower(2)">마법사 (40)</button>
+    <button class="btn" onclick="selectTower(3)">터렛 (60)</button>
 </div>
 
 <script>
 let game = document.getElementById("game");
 
+let money = 100;
+let selectedTower = 1;
+
+let towers = [];
 let enemies = [];
 let bullets = [];
 
-function startGame(){
-    setInterval(spawnEnemy, 1500);
-    setInterval(updateGame, 30);
+document.getElementById("money").innerText = money;
+
+/* 시작 */
+setInterval(spawnEnemy, 2000);
+setInterval(update, 30);
+
+/* 타워 선택 */
+function selectTower(type){
+    selectedTower = type;
 }
+
+/* 타워 설치 (길 옆만 허용) */
+game.addEventListener("click", (e)=>{
+
+    let rect = game.getBoundingClientRect();
+
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+
+    // 길 근처 체크
+    if(y > 180 && y < 300){
+
+        let cost = selectedTower == 1 ? 20 : selectedTower == 2 ? 40 : 60;
+
+        if(money < cost) return;
+
+        money -= cost;
+        updateMoney();
+
+        let tower = document.createElement("div");
+        tower.className = "tower";
+
+        let color = selectedTower == 1 ? "green" :
+                    selectedTower == 2 ? "purple" : "blue";
+
+        tower.style.background = color;
+
+        tower.style.left = (x-20) + "px";
+        tower.style.top = (y-20) + "px";
+
+        game.appendChild(tower);
+
+        towers.push({
+            el:tower,
+            x:x,
+            y:y,
+            type:selectedTower
+        });
+    }
+});
 
 /* 적 생성 */
 function spawnEnemy(){
     let enemy = document.createElement("div");
     enemy.className = "enemy";
-    enemy.style.left = Math.random()*760 + "px";
-    enemy.style.top = "0px";
+
+    enemy.style.left = "0px";
+    enemy.style.top = "235px";
+
     game.appendChild(enemy);
-    enemies.push(enemy);
+
+    enemies.push({
+        el:enemy,
+        x:0,
+        y:235,
+        hp:3
+    });
 }
 
 /* 게임 루프 */
-function updateGame(){
+function update(){
 
     // 적 이동
-    enemies.forEach((e, i)=>{
-        let top = parseInt(e.style.top);
-        e.style.top = (top + 2) + "px";
+    enemies.forEach((e,i)=>{
+        e.x += 2;
+        e.el.style.left = e.x + "px";
 
-        if(top > 500){
-            e.remove();
+        if(e.x > 800){
+            e.el.remove();
             enemies.splice(i,1);
         }
     });
 
-    // 총알 이동
-    bullets.forEach((b, i)=>{
-        let top = parseInt(b.style.top);
-        b.style.top = (top - 5) + "px";
+    // 타워 공격
+    towers.forEach(t=>{
+        enemies.forEach(e=>{
+            let dx = e.x - t.x;
+            let dy = e.y - t.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
 
-        if(top < 0){
-            b.remove();
-            bullets.splice(i,1);
-        }
+            if(dist < 120){
+                shoot(t,e);
+            }
+        });
     });
 
-    shoot();
-    checkCollision();
+    // 총알 이동
+    bullets.forEach((b,i)=>{
+        b.x += b.vx;
+        b.y += b.vy;
+
+        b.el.style.left = b.x + "px";
+        b.el.style.top = b.y + "px";
+
+        enemies.forEach(e=>{
+            if(Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<20){
+                e.hp--;
+
+                if(e.hp <= 0){
+                    e.el.remove();
+                    e.dead = true;
+                    money += 5;
+                    updateMoney();
+                }
+
+                b.el.remove();
+                bullets.splice(i,1);
+            }
+        });
+    });
+
+    enemies = enemies.filter(e=>!e.dead);
 }
 
-/* 자동 공격 */
-function shoot(){
-    if(Math.random() < 0.1){
+/* 발사 */
+function shoot(t,e){
+    if(Math.random() < 0.08){
         let bullet = document.createElement("div");
         bullet.className = "bullet";
-        bullet.style.left = "390px";
-        bullet.style.top = "430px";
+
+        bullet.x = t.x;
+        bullet.y = t.y;
+
+        let dx = e.x - t.x;
+        let dy = e.y - t.y;
+
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        bullet.vx = dx/dist * 5;
+        bullet.vy = dy/dist * 5;
+
+        bullet.el = bullet;
+
         game.appendChild(bullet);
+
         bullets.push(bullet);
     }
 }
 
-/* 충돌 체크 */
-function checkCollision(){
-    bullets.forEach((b, bi)=>{
-        enemies.forEach((e, ei)=>{
-
-            let bx = b.offsetLeft;
-            let by = b.offsetTop;
-            let ex = e.offsetLeft;
-            let ey = e.offsetTop;
-
-            if(Math.abs(bx-ex)<20 && Math.abs(by-ey)<20){
-                b.remove();
-                e.remove();
-                bullets.splice(bi,1);
-                enemies.splice(ei,1);
-            }
-        });
-    });
+/* 돈 UI */
+function updateMoney(){
+    document.getElementById("money").innerText = money;
 }
 </script>
 
