@@ -1,4 +1,4 @@
-```html
+````html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -7,132 +7,136 @@
 <title>Kingdom Defense - 게임 소개</title>
 
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Malgun Gothic', sans-serif;
-    }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Malgun Gothic',sans-serif;
+}
 
-    body {
-        background: #10131a;
-        color: white;
-        line-height: 1.6;
-    }
+body{
+    background:#10131a;
+    color:white;
+    line-height:1.6;
+}
 
-    header {
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
-        padding: 80px 20px;
-        text-align: center;
-    }
+header{
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+    padding:80px 20px;
+    text-align:center;
+}
 
-    header h1 {
-        font-size: 3rem;
-        margin-bottom: 10px;
-    }
+header h1{
+    font-size:3rem;
+    margin-bottom:10px;
+}
 
-    header p {
-        font-size: 1.2rem;
-        opacity: 0.9;
-    }
+header p{
+    font-size:1.2rem;
+    opacity:0.9;
+}
 
-    nav {
-        background: #181c25;
-        padding: 15px;
-        text-align: center;
-        position: sticky;
-        top: 0;
-    }
+nav{
+    background:#181c25;
+    padding:15px;
+    text-align:center;
+    position:sticky;
+    top:0;
+}
 
-    nav a {
-        color: white;
-        text-decoration: none;
-        margin: 0 15px;
-        font-weight: bold;
-    }
+nav a{
+    color:white;
+    text-decoration:none;
+    margin:0 15px;
+    font-weight:bold;
+}
 
-    section {
-        max-width: 1200px;
-        margin: auto;
-        padding: 60px 20px;
-    }
+section{
+    max-width:1200px;
+    margin:auto;
+    padding:60px 20px;
+}
 
-    h2 {
-        text-align: center;
-        margin-bottom: 30px;
-        color: #4db8ff;
-    }
+h2{
+    text-align:center;
+    margin-bottom:30px;
+    color:#4db8ff;
+}
 
-    .features {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    }
+.features{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
 
-    .card {
-        background: #1a202c;
-        padding: 25px;
-        border-radius: 12px;
-        transition: 0.3s;
-    }
+.card{
+    background:#1a202c;
+    padding:25px;
+    border-radius:12px;
+    transition:0.3s;
+}
 
-    .card:hover {
-        transform: translateY(-5px);
-        background: #243040;
-    }
+.card:hover{
+    transform:translateY(-5px);
+    background:#243040;
+}
 
-    .units {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        justify-content: center;
-    }
+.units{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    justify-content:center;
+}
 
-    .unit {
-        width: 250px;
-        background: #1a202c;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-    }
+.unit{
+    width:250px;
+    background:#1a202c;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+}
 
-    .unit img {
-        width: 100%;
-        border-radius: 8px;
-    }
+.unit img{
+    width:100%;
+    height:220px;
+    object-fit:contain;
+    background:white;
+    border-radius:8px;
+    padding:10px;
+}
 
-    .gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
-        gap: 20px;
-    }
+.gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:20px;
+}
 
-    .gallery img {
-        width: 100%;
-        border-radius: 10px;
-    }
+.gallery img{
+    width:100%;
+    border-radius:10px;
+}
 
-    footer {
-        background: #181c25;
-        text-align: center;
-        padding: 30px;
-        margin-top: 50px;
-    }
+footer{
+    background:#181c25;
+    text-align:center;
+    padding:30px;
+    margin-top:50px;
+}
 
-    .btn {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 12px 30px;
-        background: #4db8ff;
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        transition: 0.3s;
-    }
+.btn{
+    display:inline-block;
+    margin-top:20px;
+    padding:12px 30px;
+    background:#4db8ff;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    transition:0.3s;
+}
 
-    .btn:hover {
-        background: #2196f3;
-    }
+.btn:hover{
+    background:#2196f3;
+}
 </style>
 </head>
 <body>
@@ -174,8 +178,8 @@
         </div>
 
         <div class="card">
-            <h3>👹 강력한 보스</h3>
-            <p>특수 능력을 가진 거대한 보스를 공략하세요.</p>
+            <h3>🤖 자동 방어 시스템</h3>
+            <p>강력한 터렛 타워로 적을 자동 추적하고 공격하세요.</p>
         </div>
 
         <div class="card">
@@ -189,23 +193,25 @@
     <h2>대표 유닛</h2>
 
     <div class="units">
+
         <div class="unit">
-            <img src="images/archer.jpg" alt="궁수">
-            <h3>궁수 타워</h3>
-            <p>빠른 공격 속도로 적을 견제합니다.</p>
+            <img src="images/castle.jpg" alt="성">
+            <h3>왕국 본진</h3>
+            <p>끝까지 지켜야 하는 핵심 건물입니다.</p>
         </div>
 
         <div class="unit">
             <img src="images/mage.jpg" alt="마법사">
             <h3>마법사 타워</h3>
-            <p>광역 마법 공격을 사용합니다.</p>
+            <p>강력한 마법 에너지로 적을 공격합니다.</p>
         </div>
 
         <div class="unit">
-            <img src="images/cannon.jpg" alt="대포">
-            <h3>캐논 타워</h3>
-            <p>강력한 범위 피해를 입힙니다.</p>
+            <img src="images/turret.jpg" alt="터렛">
+            <h3>터렛 타워</h3>
+            <p>고속 연사로 적을 제압하는 자동 방어 터렛입니다.</p>
         </div>
+
     </div>
 </section>
 
