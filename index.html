@@ -1,246 +1,151 @@
-```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kingdom Defense - 게임 소개</title>
+<title>Kingdom Defense GAME</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Malgun Gothic',sans-serif;
-}
-
 body{
-    background:#10131a;
+    margin:0;
+    background:#111;
     color:white;
-    line-height:1.6;
-}
-
-header{
-    background:linear-gradient(135deg,#1e3c72,#2a5298);
-    padding:80px 20px;
+    font-family:sans-serif;
     text-align:center;
 }
 
-header h1{
-    font-size:3rem;
-    margin-bottom:10px;
+#game{
+    width:800px;
+    height:500px;
+    margin:20px auto;
+    background:#222;
+    position:relative;
+    overflow:hidden;
+    border:2px solid #4db8ff;
 }
 
-header p{
-    font-size:1.2rem;
-    opacity:0.9;
+.turret{
+    width:60px;
+    height:60px;
+    position:absolute;
+    bottom:20px;
+    left:370px;
+    background:url('images/turret.jpg');
+    background-size:cover;
 }
 
-nav{
-    background:#181c25;
-    padding:15px;
-    text-align:center;
-    position:sticky;
+.enemy{
+    width:40px;
+    height:40px;
+    position:absolute;
     top:0;
+    background:red;
+    border-radius:50%;
 }
 
-nav a{
-    color:white;
-    text-decoration:none;
-    margin:0 15px;
-    font-weight:bold;
+.bullet{
+    width:8px;
+    height:8px;
+    background:yellow;
+    position:absolute;
+    border-radius:50%;
 }
-
-section{
-    max-width:1200px;
-    margin:auto;
-    padding:60px 20px;
-}
-
-h2{
-    text-align:center;
-    margin-bottom:30px;
-    color:#4db8ff;
-}
-
-.features{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:20px;
-}
-
-.card{
-    background:#1a202c;
-    padding:25px;
-    border-radius:12px;
-    transition:0.3s;
-}
-
-.card:hover{
-    transform:translateY(-5px);
-    background:#243040;
-}
-
-.units{
-    display:flex;
-    flex-wrap:wrap;
-    gap:20px;
-    justify-content:center;
-}
-
-.unit{
-    width:250px;
-    background:#1a202c;
-    padding:20px;
-    border-radius:10px;
-    text-align:center;
-}
-
-.unit img{
-    width:100%;
-    height:220px;
-    object-fit:contain;
-    background:white;
-    border-radius:8px;
-    padding:10px;
-}
-
-.gallery{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:20px;
-}
-
-.gallery img{
-    width:100%;
-    border-radius:10px;
-}
-
-footer{
-    background:#181c25;
-    text-align:center;
-    padding:30px;
-    margin-top:50px;
-}
-
-.btn{
-    display:inline-block;
-    margin-top:20px;
-    padding:12px 30px;
+button{
+    padding:10px 20px;
+    margin-top:10px;
     background:#4db8ff;
+    border:none;
     color:white;
-    text-decoration:none;
-    border-radius:8px;
-    transition:0.3s;
-}
-
-.btn:hover{
-    background:#2196f3;
+    cursor:pointer;
 }
 </style>
 </head>
+
 <body>
 
-<header>
-    <h1>🏰 Kingdom Defense</h1>
-    <p>왕국을 침략하는 몬스터를 막아라!</p>
-    <a href="#download" class="btn">게임 시작하기</a>
-</header>
+<h1>🏰 Kingdom Defense GAME</h1>
 
-<nav>
-    <a href="#about">게임 소개</a>
-    <a href="#features">특징</a>
-    <a href="#units">유닛</a>
-    <a href="#screenshots">스크린샷</a>
-</nav>
+<button onclick="startGame()">게임 시작</button>
 
-<section id="about">
-    <h2>게임 소개</h2>
-    <p style="text-align:center;">
-        Kingdom Defense는 전략적인 타워 배치와 영웅 육성을 통해
-        적의 침공을 막아내는 실시간 타워디펜스 게임입니다.
-        다양한 스테이지와 강력한 보스 몬스터가 여러분을 기다립니다.
-    </p>
-</section>
+<div id="game">
+    <div class="turret"></div>
+</div>
 
-<section id="features">
-    <h2>주요 특징</h2>
+<script>
+let game = document.getElementById("game");
 
-    <div class="features">
-        <div class="card">
-            <h3>⚔ 전략적 배치</h3>
-            <p>지형과 적의 이동 경로를 분석하여 최적의 타워를 배치하세요.</p>
-        </div>
+let enemies = [];
+let bullets = [];
+let money = 0;
 
-        <div class="card">
-            <h3>🧙 다양한 영웅</h3>
-            <p>각기 다른 스킬을 가진 영웅을 성장시키고 활용하세요.</p>
-        </div>
+function startGame(){
+    setInterval(spawnEnemy, 2000);
+    setInterval(gameLoop, 50);
+}
 
-        <div class="card">
-            <h3>🤖 자동 방어 시스템</h3>
-            <p>강력한 터렛 타워로 적을 자동 추적하고 공격하세요.</p>
-        </div>
+function spawnEnemy(){
+    let enemy = document.createElement("div");
+    enemy.className = "enemy";
+    enemy.style.left = Math.random()*760 + "px";
+    game.appendChild(enemy);
+    enemies.push(enemy);
+}
 
-        <div class="card">
-            <h3>🌎 다양한 맵</h3>
-            <p>숲, 사막, 얼음 왕국 등 개성 넘치는 전장을 경험하세요.</p>
-        </div>
-    </div>
-</section>
+function gameLoop(){
+    enemies.forEach((e, i)=>{
+        let top = parseInt(e.style.top || 0);
+        top += 2;
+        e.style.top = top + "px";
 
-<section id="units">
-    <h2>대표 유닛</h2>
+        if(top > 500){
+            e.remove();
+            enemies.splice(i,1);
+        }
+    });
 
-    <div class="units">
+    bullets.forEach((b,i)=>{
+        let top = parseInt(b.style.top);
+        b.style.top = (top - 5) + "px";
 
-        <div class="unit">
-            <img src="images/castle.jpg" alt="성">
-            <h3>왕국 본진</h3>
-            <p>끝까지 지켜야 하는 핵심 건물입니다.</p>
-        </div>
+        if(top < 0){
+            b.remove();
+            bullets.splice(i,1);
+        }
+    });
 
-        <div class="unit">
-            <img src="images/mage.jpg" alt="마법사">
-            <h3>마법사 타워</h3>
-            <p>강력한 마법 에너지로 적을 공격합니다.</p>
-        </div>
+    shoot();
+    checkHit();
+}
 
-        <div class="unit">
-            <img src="images/turret.jpg" alt="터렛">
-            <h3>터렛 타워</h3>
-            <p>고속 연사로 적을 제압하는 자동 방어 터렛입니다.</p>
-        </div>
+function shoot(){
+    if(Math.random() < 0.1){
+        let bullet = document.createElement("div");
+        bullet.className = "bullet";
+        bullet.style.left = "390px";
+        bullet.style.top = "440px";
+        game.appendChild(bullet);
+        bullets.push(bullet);
+    }
+}
 
-    </div>
-</section>
+function checkHit(){
+    bullets.forEach((b, bi)=>{
+        enemies.forEach((e, ei)=>{
+            let bx = b.offsetLeft;
+            let by = b.offsetTop;
+            let ex = e.offsetLeft;
+            let ey = e.offsetTop;
 
-<section id="screenshots">
-    <h2>게임 스크린샷</h2>
-
-    <div class="gallery">
-        <img src="images/screenshot1.jpg" alt="게임 화면 1">
-        <img src="images/screenshot2.jpg" alt="게임 화면 2">
-        <img src="images/screenshot3.jpg" alt="게임 화면 3">
-    </div>
-</section>
-
-<section id="download">
-    <h2>지금 플레이하세요!</h2>
-
-    <p style="text-align:center;">
-        전략과 전술의 재미를 경험해보세요.
-    </p>
-
-    <div style="text-align:center;">
-        <a href="#" class="btn">다운로드</a>
-    </div>
-</section>
-
-<footer>
-    <p>© 2026 Kingdom Defense. All Rights Reserved.</p>
-</footer>
+            if(Math.abs(bx-ex)<20 && Math.abs(by-ey)<20){
+                b.remove();
+                e.remove();
+                bullets.splice(bi,1);
+                enemies.splice(ei,1);
+                money += 10;
+            }
+        });
+    });
+}
+</script>
 
 </body>
 </html>
-```
