@@ -36,6 +36,7 @@ body{
     height:50px;
     position:absolute;
     background-size:cover;
+    background-position:center;
 }
 
 .enemy{
@@ -61,10 +62,6 @@ body{
     border-radius:50%;
 }
 
-#ui{
-    margin-top:10px;
-}
-
 button{
     margin:5px;
     padding:10px;
@@ -86,13 +83,12 @@ button{
     <div class="path"></div>
 </div>
 
-<div id="ui">
+<div>
     <button onclick="select(1)">궁수 (20)</button>
     <button onclick="select(2)">마법사 (40)</button>
     <button onclick="select(3)">터렛 (60)</button>
 </div>
 
-<!-- 사운드 -->
 <audio id="shoot" src="sound/shoot.mp3"></audio>
 <audio id="kill" src="sound/kill.mp3"></audio>
 <audio id="boss" src="sound/boss.mp3"></audio>
@@ -102,7 +98,6 @@ let game = document.getElementById("game");
 
 let money = 100;
 let wave = 1;
-
 let selected = 1;
 
 let towers = [];
@@ -111,7 +106,19 @@ let bullets = [];
 
 document.getElementById("money").innerText = money;
 
-/* 웨이브 시스템 */
+/* ===================== */
+/*        PATH (3코너)    */
+/* ===================== */
+const path = [
+    {x:0, y:235},
+    {x:300, y:235},
+    {x:300, y:120},
+    {x:800, y:120}
+];
+
+/* ===================== */
+/*       WAVE SYSTEM      */
+/* ===================== */
 function startWave(){
     let count = wave * 3;
 
@@ -136,151 +143,255 @@ function startWave(){
 
 startWave();
 
-/* 타워 선택 */
+/* ===================== */
+/*       SELECT TOWER    */
+/* ===================== */
 function select(t){
     selected = t;
 }
 
-/* 타워 설치 */
+/* ===================== */
+/*     PATH CHECK (건설 금지) */
+/* ===================== */
+function isOnPath(x,y){
+    return (y > 190 && y < 280);
+}
+
+/* ===================== */
+/*     PLACE TOWER       */
+/* ===================== */
 game.addEventListener("click",(e)=>{
     let rect = game.getBoundingClientRect();
     let x = e.clientX - rect.left;
     let y = e.clientY - rect.top;
 
-    if(y > 180 && y < 300){
+    if(isOnPath(x,y)) return;
 
-        let cost = selected==1?20:selected==2?40:60;
-        if(money < cost) return;
+    let cost = selected==1?20:selected==2?40:60;
+    if(money < cost) return;
 
-        money -= cost;
-        updateMoney();
+    money -= cost;
+    updateMoney();
 
-        let tower = document.createElement("div");
-        tower.className = "tower";
+    let tower = document.createElement("div");
+    tower.className = "tower";
 
-        let img = selected==1?"archer.jpg":
-                  selected==2?"mage.jpg":"turret.jpg";
+    let img =
+        selected==1?"archer.jpg":
+        selected==2?"mage.jpg":
+        "turret.jpg";
 
-        tower.style.backgroundImage = `url('./images/${img}')`;
-        tower.style.left = (x-25)+"px";
-        tower.style.top = (y-25)+"px";
+    tower.style.backgroundImage = `url('./images/${img}')`;
+    tower.style.left = (x-25)+"px";
+    tower.style.top = (y-25)+"px";
 
-        game.appendChild(tower);
+    game.appendChild(tower);
 
-        towers.push({el:tower,x:x,y:y});
-    }
+    towers.push({
+        el:tower,
+        x,y,
+        cd:0,
+        type:selected
+    });
 });
 
-/* 적 */
+/* ===================== */
+/*     ENEMY SPAWN       */
+/* ===================== */
 function spawnEnemy(){
     let e = document.createElement("div");
     e.className = "enemy";
-    e.style.left="0px";
-    e.style.top="235px";
 
     game.appendChild(e);
 
-    enemies.push({el:e,x:0,y:235,hp:3});
+    enemies.push({
+        el:e,
+        x:0,
+        y:235,
+        hp:3,
+        pathIndex:0
+    });
 }
 
-/* 보스 */
+/* ===================== */
+/*        BOSS           */
+/* ===================== */
 function spawnBoss(){
     let b = document.createElement("div");
     b.className = "boss";
-    b.style.left="0px";
-    b.style.top="210px";
 
     game.appendChild(b);
 
-    enemies.push({el:b,x:0,y:210,hp:20,boss:true});
+    enemies.push({
+        el:b,
+        x:0,
+        y:210,
+        hp:20,
+        boss:true,
+        pathIndex:0
+    });
 
-    document.getElementById("boss").play();
+    document.getElementById("boss").play().catch(()=>{});
 }
 
-/* 업데이트 */
+/* ===================== */
+/*     MOVE ENEMY        */
+/* ===================== */
+function moveEnemy(e){
+    let target = path[e.pathIndex];
+    if(!target) return;
+
+    let dx = target.x - e.x;
+    let dy = target.y - e.y;
+    let dist = Math.sqrt(dx*dx + dy*dy);
+
+    let speed = e.boss ? 1 : 2;
+
+    if(dist < speed){
+        e.x = target.x;
+        e.y = target.y;
+        e.pathIndex++;
+    } else {
+        e.x += dx / dist * speed;
+        e.y += dy / dist * speed;
+    }
+
+    e.el.style.left = e.x+"px";
+    e.el.style.top = e.y+"px";
+}
+
+/* ===================== */
+/*     SHOOT SYSTEM      */
+/* ===================== */
+function shoot(t,e){
+
+    if(t.type === 1){
+        createBullet(t,e,6,0,false);
+    }
+
+    else if(t.type === 2){
+        createBullet(t,e,3,30,true);
+    }
+
+    else if(t.type === 3){
+        createBullet(t,e,8,0,false);
+    }
+}
+
+/* ===================== */
+/*   CREATE BULLET       */
+/* ===================== */
+function createBullet(t,e,speed,splash,isMagic){
+
+    let b = document.createElement("div");
+    b.className = "bullet";
+
+    let dx = e.x - t.x;
+    let dy = e.y - t.y;
+    let d = Math.sqrt(dx*dx + dy*dy);
+
+    let bullet = {
+        el:b,
+        x:t.x,
+        y:t.y,
+        vx:dx/d*speed,
+        vy:dy/d*speed,
+        splash:splash
+    };
+
+    game.appendChild(b);
+    bullets.push(bullet);
+
+    document.getElementById("shoot").play().catch(()=>{});
+}
+
+/* ===================== */
+/*       UPDATE LOOP     */
+/* ===================== */
 setInterval(update,30);
 
 function update(){
 
-    enemies.forEach((e,i)=>{
-        e.x += e.boss?1:2;
-        e.el.style.left = e.x+"px";
-
-        if(e.x > 800){
-            e.el.remove();
-            enemies.splice(i,1);
-        }
+    /* MOVE ENEMIES */
+    enemies.forEach(e=>{
+        moveEnemy(e);
     });
 
+    /* TOWER ATTACK */
     towers.forEach(t=>{
+        if(t.cd > 0) t.cd--;
+
         enemies.forEach(e=>{
             let dx=e.x-t.x;
             let dy=e.y-t.y;
             let d=Math.sqrt(dx*dx+dy*dy);
 
-            if(d<130){
+            if(d<130 && t.cd<=0){
                 shoot(t,e);
+                t.cd = 20;
             }
         });
     });
 
-    bullets.forEach((b,i)=>{
-        b.x+=b.vx;
-        b.y+=b.vy;
+    /* BULLET UPDATE */
+    for(let i=bullets.length-1;i>=0;i--){
+        let b = bullets[i];
 
-        b.el.style.left=b.x+"px";
-        b.el.style.top=b.y+"px";
+        b.x += b.vx;
+        b.y += b.vy;
 
-        enemies.forEach(e=>{
-            if(Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<20){
-                e.hp--;
+        b.el.style.left = b.x+"px";
+        b.el.style.top = b.y+"px";
 
-                document.getElementById("kill").play();
+        for(let j=0;j<enemies.length;j++){
+            let e = enemies[j];
+
+            let hit =
+                Math.abs(b.x-e.x)<20 &&
+                Math.abs(b.y-e.y)<20;
+
+            if(hit){
+
+                /* AOE MAGIC */
+                if(b.splash > 0){
+                    enemies.forEach(en=>{
+                        let dx = en.x - b.x;
+                        let dy = en.y - b.y;
+                        let d = Math.sqrt(dx*dx + dy*dy);
+
+                        if(d < b.splash){
+                            en.hp -= 2;
+                        }
+                    });
+                }
+                else {
+                    e.hp -= 1;
+                }
+
+                document.getElementById("kill").play().catch(()=>{});
 
                 if(e.hp<=0){
                     e.el.remove();
-                    e.dead=true;
-                    money+=10;
+                    e.dead = true;
+                    money += 10;
                     updateMoney();
                 }
 
                 b.el.remove();
                 bullets.splice(i,1);
+                break;
             }
-        });
-    });
+        }
+    }
 
     enemies = enemies.filter(e=>!e.dead);
 }
 
-/* 공격 */
-function shoot(t,e){
-    if(Math.random()<0.07){
-        let b=document.createElement("div");
-        b.className="bullet";
-
-        let dx=e.x-t.x;
-        let dy=e.y-t.y;
-        let d=Math.sqrt(dx*dx+dy*dy);
-
-        b.x=t.x;
-        b.y=t.y;
-
-        b.vx=dx/d*5;
-        b.vy=dy/d*5;
-
-        b.el=b;
-
-        game.appendChild(b);
-        bullets.push(b);
-
-        document.getElementById("shoot").play();
-    }
-}
-
-/* 돈 */
+/* ===================== */
+/*       MONEY UI        */
+/* ===================== */
 function updateMoney(){
-    document.getElementById("money").innerText=money;
+    document.getElementById("money").innerText = money;
 }
 </script>
 
